@@ -3,6 +3,7 @@ package instatrace
 import (
 	"context"
 	"sync"
+	"time"
 
 	instana "github.com/instana/go-sensor"
 	"github.com/opentracing/opentracing-go"
@@ -15,19 +16,34 @@ type ocSpanContextKey struct {
 	SpanID  trace.SpanID
 }
 
+// ExporterOptions contains configuration for Exporter
+type ExporterOptions struct {
+	// The maximum time to keep OpenCensus spans that cannot be mapped to Instana trace in cache.
+	// If an exit span for a trace does not arrive within this period of time, it will be discarded.
+	// By default the exported does not discard any spans.
+	MaxTraceDuration time.Duration
+}
+
 // Exporter is an go.opencensus.io/trace.Exporter that listens for OpenCensus spans
 // and attaches them to Instana traces
 type Exporter struct {
 	sensor   *instana.Sensor
 	mu       sync.RWMutex
 	ocTraces map[ocSpanContextKey]instana.SpanContext
+	unmapped *ttlSpanDataCache
 }
 
 // NewExporter initializes a new opencensus.Exporter
-func NewExporter(sensor *instana.Sensor) *Exporter {
+func NewExporter(sensor *instana.Sensor, opts ExporterOptions) *Exporter {
+	ttlCache := newTTLSpanDataCache(opts.MaxTraceDuration)
+	if opts.MaxTraceDuration > 0 {
+		go ttlCache.Cleanup(context.Background())
+	}
+
 	return &Exporter{
 		sensor:   sensor,
 		ocTraces: make(map[ocSpanContextKey]instana.SpanContext),
+		unmapped: ttlCache,
 	}
 }
 
@@ -40,14 +56,14 @@ func (exp *Exporter) ExportSpan(s *trace.SpanData) {
 	exp.mu.RUnlock()
 
 	if !ok {
+		exp.sensor.Logger().Debug("enqueueing ", spanDataToString(s), " to consider it later")
+		exp.unmapped.Put(k, s)
+
 		return
 	}
 
 	exp.sensor.Logger().Debug(
-		"mapping OpenCensus span ", s.Name,
-		" (traceID: ", s.TraceID.String(), ", ",
-		"spanID: ", s.SpanID.String(), ") ",
-		" to Instana trace ", instana.FormatID(spCtx.TraceID),
+		"mapping OpenCensus span ", spanDataToString(s), " to Instana trace ", instana.FormatID(spCtx.TraceID),
 	)
 
 	exp.mu.Lock()
@@ -60,16 +76,25 @@ func (exp *Exporter) ExportSpan(s *trace.SpanData) {
 	}
 	tags[string(ext.SpanKind)] = convertSpanKind(s.SpanKind)
 
-	exp.sensor.Tracer().StartSpan(
+	sp := exp.sensor.Tracer().StartSpan(
 		s.Name,
 		opentracing.ChildOf(spCtx),
 		opentracing.StartTime(s.StartTime),
 		tags,
-	).FinishWithOptions(
-		opentracing.FinishOptions{
-			FinishTime: s.EndTime,
-		},
 	)
+	sp.FinishWithOptions(opentracing.FinishOptions{FinishTime: s.EndTime})
+
+	// store the non-exit span mapping and wait for the exit span
+	if s.SpanKind != trace.SpanKindClient {
+		exp.mapOCTrace(s.TraceID, s.SpanID, sp.Context().(instana.SpanContext))
+	}
+
+	if queued := exp.unmapped.Fetch(ocSpanContextKey{s.TraceID, s.SpanID}); len(queued) > 0 {
+		exp.sensor.Logger().Debug("found ", len(queued), " OpenCensus span(s) stored for later consideration")
+		for _, s := range queued {
+			exp.ExportSpan(s)
+		}
+	}
 }
 
 // Context starts a new OpenCensus span and injects it into provided context. This
@@ -82,12 +107,17 @@ func (exp *Exporter) Context(ctx context.Context) (context.Context, *trace.Span)
 	)
 
 	if sp, ok := instana.SpanFromContext(ctx); ok {
-		exp.mu.Lock()
-		exp.ocTraces[ocSpanContextKey{ocSpan.SpanContext().TraceID, ocSpan.SpanContext().SpanID}] = sp.Context().(instana.SpanContext)
-		exp.mu.Unlock()
+		exp.mapOCTrace(ocSpan.SpanContext().TraceID, ocSpan.SpanContext().SpanID, sp.Context().(instana.SpanContext))
 	}
 
 	return ctx, ocSpan
+}
+
+func (exp *Exporter) mapOCTrace(traceID trace.TraceID, spanID trace.SpanID, spCtx instana.SpanContext) {
+	exp.mu.Lock()
+	defer exp.mu.Unlock()
+
+	exp.ocTraces[ocSpanContextKey{traceID, spanID}] = spCtx
 }
 
 func convertSpanKind(ocSpanKind int) ext.SpanKindEnum {
@@ -98,5 +128,75 @@ func convertSpanKind(ocSpanKind int) ext.SpanKindEnum {
 		return ext.SpanKindRPCServerEnum
 	default:
 		return "intermediate"
+	}
+}
+
+func spanDataToString(s *trace.SpanData) string {
+	return s.Name + " (traceID: " + s.TraceID.String() + ", spanID: " + s.SpanID.String() + ")"
+}
+
+type spanDataCacheEntry struct {
+	items     []*trace.SpanData
+	expiresAt time.Time
+}
+
+type ttlSpanDataCache struct {
+	ttl     time.Duration
+	mu      sync.Mutex
+	entries map[ocSpanContextKey]spanDataCacheEntry
+}
+
+func newTTLSpanDataCache(ttl time.Duration) *ttlSpanDataCache {
+	return &ttlSpanDataCache{
+		ttl:     ttl,
+		entries: make(map[ocSpanContextKey]spanDataCacheEntry),
+	}
+}
+
+func (c *ttlSpanDataCache) Put(k ocSpanContextKey, s *trace.SpanData) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.entries[k] = spanDataCacheEntry{
+		items:     append(c.entries[k].items, s),
+		expiresAt: time.Now().Add(c.ttl),
+	}
+}
+
+func (c *ttlSpanDataCache) Fetch(k ocSpanContextKey) []*trace.SpanData {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if entries, ok := c.entries[k]; ok {
+		delete(c.entries, k)
+		return entries.items
+	}
+
+	return nil
+}
+
+func (c *ttlSpanDataCache) Cleanup(ctx context.Context) {
+	t := time.NewTicker(c.ttl / 2)
+	defer t.Stop()
+
+	for {
+		select {
+		case <-t.C:
+			c.cleanup()
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func (c *ttlSpanDataCache) cleanup() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	now := time.Now()
+	for k, v := range c.entries {
+		if !v.expiresAt.After(now) {
+			delete(c.entries, k)
+		}
 	}
 }
