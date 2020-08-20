@@ -35,7 +35,7 @@ func TestExporter_ExportSpan(t *testing.T) {
 	parent := s.Tracer().StartSpan("entry")
 	ctx, _ := exp.Context(instana.ContextWithSpan(context.Background(), parent))
 
-	_, ocSpan := trace.StartSpan(ctx, "opencensus")
+	_, ocSpan := trace.StartSpan(ctx, "opencensus", trace.WithSpanKind(trace.SpanKindClient))
 	ocSpan.AddAttributes(
 		trace.StringAttribute("stringKey", "value"),
 		trace.Int64Attribute("answer", 42),

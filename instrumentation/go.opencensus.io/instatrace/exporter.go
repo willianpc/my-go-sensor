@@ -54,12 +54,17 @@ func (exp *Exporter) ExportSpan(s *trace.SpanData) {
 	delete(exp.ocTraces, k)
 	exp.mu.Unlock()
 
+	tags := make(opentracing.Tags, len(s.Attributes)+1)
+	for k, v := range s.Attributes {
+		tags[k] = v
+	}
+	tags[string(ext.SpanKind)] = convertSpanKind(s.SpanKind)
+
 	exp.sensor.Tracer().StartSpan(
 		s.Name,
-		ext.SpanKindRPCClient,
 		opentracing.ChildOf(spCtx),
 		opentracing.StartTime(s.StartTime),
-		opentracing.Tags(s.Attributes),
+		tags,
 	).FinishWithOptions(
 		opentracing.FinishOptions{
 			FinishTime: s.EndTime,
@@ -83,4 +88,15 @@ func (exp *Exporter) Context(ctx context.Context) (context.Context, *trace.Span)
 	}
 
 	return ctx, ocSpan
+}
+
+func convertSpanKind(ocSpanKind int) ext.SpanKindEnum {
+	switch ocSpanKind {
+	case trace.SpanKindClient:
+		return ext.SpanKindRPCClientEnum
+	case trace.SpanKindServer:
+		return ext.SpanKindRPCServerEnum
+	default:
+		return "intermediate"
+	}
 }
