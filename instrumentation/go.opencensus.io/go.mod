@@ -1,4 +1,4 @@
-module github.com/instana/go-sensor/instrumentation/go.opencensus.io/instatrace
+module github.com/instana/go-sensor/instrumentation/go.opencensus.io
 
 go 1.9
 
