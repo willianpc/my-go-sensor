@@ -33,8 +33,13 @@ type Mapper struct {
 	unmapped *ttlSpanDataCache
 }
 
-// NewMapper initializes a new opencensus.Mapper
-func NewMapper(sensor *instana.Sensor, opts MapperOptions) *Mapper {
+// NewMapper initializes a new opencensus.Mapper with default options
+func NewMapper(sensor *instana.Sensor) *Mapper {
+	return NewMapperWithOptions(sensor, MapperOptions{})
+}
+
+// NewMapper initializes a new opencensus.Mapper with provided options
+func NewMapperWithOptions(sensor *instana.Sensor, opts MapperOptions) *Mapper {
 	ttlCache := newTTLSpanDataCache(opts.MaxTraceDuration)
 	if opts.MaxTraceDuration > 0 {
 		go ttlCache.Cleanup(context.Background())

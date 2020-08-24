@@ -16,7 +16,7 @@ import (
 
 func TestMapper_Context(t *testing.T) {
 	s := instana.NewSensor("testing")
-	exp := instatrace.NewMapper(s, instatrace.MapperOptions{})
+	exp := instatrace.NewMapper(s)
 
 	ctx, sp := exp.Context(context.Background())
 
@@ -28,7 +28,7 @@ func TestMapper_ExportSpan(t *testing.T) {
 	rec := instana.NewTestRecorder()
 
 	s := instana.NewSensorWithTracer(instana.NewTracerWithEverything(instana.DefaultOptions(), rec))
-	exp := instatrace.NewMapper(s, instatrace.MapperOptions{})
+	exp := instatrace.NewMapper(s)
 
 	trace.RegisterExporter(exp)
 	defer trace.UnregisterExporter(exp)
@@ -73,7 +73,7 @@ func TestMapper_ExportSpan_MultiSpanTrace(t *testing.T) {
 	rec := instana.NewTestRecorder()
 
 	s := instana.NewSensorWithTracer(instana.NewTracerWithEverything(instana.DefaultOptions(), rec))
-	exp := instatrace.NewMapper(s, instatrace.MapperOptions{})
+	exp := instatrace.NewMapper(s)
 
 	trace.RegisterExporter(exp)
 	defer trace.UnregisterExporter(exp)
@@ -104,7 +104,7 @@ func TestMapper_ExportSpan_MultiSpanTrace_LongRunningTrace(t *testing.T) {
 	rec := instana.NewTestRecorder()
 
 	s := instana.NewSensorWithTracer(instana.NewTracerWithEverything(instana.DefaultOptions(), rec))
-	exp := instatrace.NewMapper(s, instatrace.MapperOptions{
+	exp := instatrace.NewMapperWithOptions(s, instatrace.MapperOptions{
 		MaxTraceDuration: 10 * time.Millisecond,
 	})
 
@@ -137,7 +137,7 @@ func TestMapper_ExportSpan_NoInstanaTrace(t *testing.T) {
 	rec := instana.NewTestRecorder()
 
 	s := instana.NewSensorWithTracer(instana.NewTracerWithEverything(instana.DefaultOptions(), rec))
-	exp := instatrace.NewMapper(s, instatrace.MapperOptions{})
+	exp := instatrace.NewMapper(s)
 
 	trace.RegisterExporter(exp)
 	defer trace.UnregisterExporter(exp)
