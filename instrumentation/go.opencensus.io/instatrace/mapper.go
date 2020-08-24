@@ -17,30 +17,30 @@ type ocSpanContextKey struct {
 }
 
 // ExporterOptions contains configuration for Exporter
-type ExporterOptions struct {
+type MapperOptions struct {
 	// The maximum time to keep OpenCensus spans that cannot be mapped to Instana trace in cache.
 	// If an exit span for a trace does not arrive within this period of time, it will be discarded.
 	// By default the exported does not discard any spans.
 	MaxTraceDuration time.Duration
 }
 
-// Exporter is an go.opencensus.io/trace.Exporter that listens for OpenCensus spans
-// and attaches them to Instana traces
-type Exporter struct {
+// Mapper is an go.opencensus.io/trace.Exporter that listens for OpenCensus spans
+// and maps them to Instana traces
+type Mapper struct {
 	sensor   *instana.Sensor
 	mu       sync.RWMutex
 	ocTraces map[ocSpanContextKey]instana.SpanContext
 	unmapped *ttlSpanDataCache
 }
 
-// NewExporter initializes a new opencensus.Exporter
-func NewExporter(sensor *instana.Sensor, opts ExporterOptions) *Exporter {
+// NewMapper initializes a new opencensus.Mapper
+func NewMapper(sensor *instana.Sensor, opts MapperOptions) *Mapper {
 	ttlCache := newTTLSpanDataCache(opts.MaxTraceDuration)
 	if opts.MaxTraceDuration > 0 {
 		go ttlCache.Cleanup(context.Background())
 	}
 
-	return &Exporter{
+	return &Mapper{
 		sensor:   sensor,
 		ocTraces: make(map[ocSpanContextKey]instana.SpanContext),
 		unmapped: ttlCache,
@@ -48,7 +48,7 @@ func NewExporter(sensor *instana.Sensor, opts ExporterOptions) *Exporter {
 }
 
 // ExportSpan implements go.opencensus.io/trace.Exporter for Exporter
-func (exp *Exporter) ExportSpan(s *trace.SpanData) {
+func (exp *Mapper) ExportSpan(s *trace.SpanData) {
 	k := ocSpanContextKey{s.TraceID, s.ParentSpanID}
 
 	exp.mu.RLock()
@@ -99,7 +99,7 @@ func (exp *Exporter) ExportSpan(s *trace.SpanData) {
 
 // Context starts a new OpenCensus span and injects it into provided context. This
 // span is than used to correlate the OpenCensus trace with Instana
-func (exp *Exporter) Context(ctx context.Context) (context.Context, *trace.Span) {
+func (exp *Mapper) Context(ctx context.Context) (context.Context, *trace.Span) {
 	ctx, ocSpan := trace.StartSpan(
 		ctx,
 		"github.com/instana/go-sensor/instrumentation/gcp/instastorage.Context",
@@ -113,7 +113,7 @@ func (exp *Exporter) Context(ctx context.Context) (context.Context, *trace.Span)
 	return ctx, ocSpan
 }
 
-func (exp *Exporter) mapOCTrace(traceID trace.TraceID, spanID trace.SpanID, spCtx instana.SpanContext) {
+func (exp *Mapper) mapOCTrace(traceID trace.TraceID, spanID trace.SpanID, spCtx instana.SpanContext) {
 	exp.mu.Lock()
 	defer exp.mu.Unlock()
 

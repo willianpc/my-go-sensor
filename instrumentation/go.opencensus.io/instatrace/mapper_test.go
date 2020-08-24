@@ -14,9 +14,9 @@ import (
 	"go.opencensus.io/trace"
 )
 
-func TestExporter_Context(t *testing.T) {
+func TestMapper_Context(t *testing.T) {
 	s := instana.NewSensor("testing")
-	exp := instatrace.NewExporter(s, instatrace.ExporterOptions{})
+	exp := instatrace.NewMapper(s, instatrace.MapperOptions{})
 
 	ctx, sp := exp.Context(context.Background())
 
@@ -24,11 +24,11 @@ func TestExporter_Context(t *testing.T) {
 	assert.Equal(t, sp, trace.FromContext(ctx))
 }
 
-func TestExporter_ExportSpan(t *testing.T) {
+func TestMapper_ExportSpan(t *testing.T) {
 	rec := instana.NewTestRecorder()
 
 	s := instana.NewSensorWithTracer(instana.NewTracerWithEverything(instana.DefaultOptions(), rec))
-	exp := instatrace.NewExporter(s, instatrace.ExporterOptions{})
+	exp := instatrace.NewMapper(s, instatrace.MapperOptions{})
 
 	trace.RegisterExporter(exp)
 	defer trace.UnregisterExporter(exp)
@@ -69,11 +69,11 @@ func TestExporter_ExportSpan(t *testing.T) {
 	}, spanData.Tags.Custom)
 }
 
-func TestExporter_ExportSpan_MultiSpanTrace(t *testing.T) {
+func TestMapper_ExportSpan_MultiSpanTrace(t *testing.T) {
 	rec := instana.NewTestRecorder()
 
 	s := instana.NewSensorWithTracer(instana.NewTracerWithEverything(instana.DefaultOptions(), rec))
-	exp := instatrace.NewExporter(s, instatrace.ExporterOptions{})
+	exp := instatrace.NewMapper(s, instatrace.MapperOptions{})
 
 	trace.RegisterExporter(exp)
 	defer trace.UnregisterExporter(exp)
@@ -100,11 +100,11 @@ func TestExporter_ExportSpan_MultiSpanTrace(t *testing.T) {
 	assert.Equal(t, intermSpan.SpanID, exitSpan.ParentID)
 }
 
-func TestExporter_ExportSpan_MultiSpanTrace_LongRunningTrace(t *testing.T) {
+func TestMapper_ExportSpan_MultiSpanTrace_LongRunningTrace(t *testing.T) {
 	rec := instana.NewTestRecorder()
 
 	s := instana.NewSensorWithTracer(instana.NewTracerWithEverything(instana.DefaultOptions(), rec))
-	exp := instatrace.NewExporter(s, instatrace.ExporterOptions{
+	exp := instatrace.NewMapper(s, instatrace.MapperOptions{
 		MaxTraceDuration: 10 * time.Millisecond,
 	})
 
@@ -133,11 +133,11 @@ func TestExporter_ExportSpan_MultiSpanTrace_LongRunningTrace(t *testing.T) {
 	assert.Equal(t, entrySpan.SpanID, intermSpan.ParentID)
 }
 
-func TestExporter_ExportSpan_NoInstanaTrace(t *testing.T) {
+func TestMapper_ExportSpan_NoInstanaTrace(t *testing.T) {
 	rec := instana.NewTestRecorder()
 
 	s := instana.NewSensorWithTracer(instana.NewTracerWithEverything(instana.DefaultOptions(), rec))
-	exp := instatrace.NewExporter(s, instatrace.ExporterOptions{})
+	exp := instatrace.NewMapper(s, instatrace.MapperOptions{})
 
 	trace.RegisterExporter(exp)
 	defer trace.UnregisterExporter(exp)
