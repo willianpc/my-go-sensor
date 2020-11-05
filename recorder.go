@@ -1,7 +1,11 @@
 package instana
 
 import (
+	"context"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -31,6 +35,20 @@ func NewRecorder() *Recorder {
 			if sensor.agent.Ready() {
 				go r.send()
 			}
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-quit
+		r.send()
+
+		ctx, cancel := context.WithTimeout(context.Background(), defaultServerlessTimeout)
+		defer cancel()
+
+		if err := sensor.agent.Flush(ctx); err != nil {
+			sensor.logger.Error("failed to send collected traces before exit: ", err)
 		}
 	}()
 
