@@ -84,7 +84,7 @@ func injectTraceContext(sc SpanContext, opaqueCarrier interface{}) error {
 		addEUMHeaders(h, sc)
 	}
 
-	carrier.Set(exstfieldT, FormatID(sc.TraceID))
+	carrier.Set(exstfieldT, FormatLongID(sc.TraceIDHi, sc.TraceID))
 	carrier.Set(exstfieldS, FormatID(sc.SpanID))
 	carrier.Set(exstfieldL, formatLevel(sc))
 
