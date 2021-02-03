@@ -45,8 +45,9 @@ func NewRootSpanContext() SpanContext {
 	spanID := randomID()
 
 	return SpanContext{
-		TraceID: spanID,
-		SpanID:  spanID,
+		TraceIDHi: randomID(),
+		TraceID:   spanID,
+		SpanID:    spanID,
 	}
 }
 
