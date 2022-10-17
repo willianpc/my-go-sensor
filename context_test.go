@@ -5,6 +5,7 @@ package instana_test
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	instana "github.com/instana/go-sensor"
@@ -13,12 +14,9 @@ import (
 )
 
 func TestSpanFromContext_WithActiveSpan(t *testing.T) {
-	ch := make(chan struct{})
 	recorder := instana.NewTestRecorder()
-	tracer := instana.NewTracerWithEverything(&instana.Options{TestOnlyChannel: ch}, recorder)
-	defer func() {
-		ch <- struct{}{}
-	}()
+	tracer := instana.NewTracerWithEverything(&instana.Options{Service: "instana|test"}, recorder)
+	defer os.Setenv("INSTANA_GO_CLEAR_TEST", "clear_pls")
 
 	span := tracer.StartSpan("test")
 	ctx := instana.ContextWithSpan(context.Background(), span)

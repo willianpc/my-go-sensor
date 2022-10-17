@@ -43,8 +43,6 @@ type Options struct {
 	Tracer TracerOptions
 
 	disableW3CTraceCorrelation bool
-
-	TestOnlyChannel interface{}
 }
 
 // DefaultOptions returns the default set of options to configure Instana sensor.

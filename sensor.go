@@ -6,7 +6,6 @@ package instana
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -168,16 +167,20 @@ func InitSensor(options *Options) {
 		options = DefaultOptions()
 	}
 
-	if theChannel, ok := options.TestOnlyChannel.(chan struct{}); ok {
-		fmt.Println("the secret TestOnlyChannel is a chan struct{}")
+	sensor = newSensor(options)
 
+	if strings.HasSuffix(options.Service, "|test") {
+		options.Service = options.Service[:len(options.Service)-5]
 		go func() {
-			<-theChannel
-			testOnlyStopSensor()
+			for {
+				if os.Getenv("INSTANA_GO_CLEAR_TEST") == "clear_pls" {
+					os.Setenv("INSTANA_GO_CLEAR_TEST", "")
+					testOnlyStopSensor()
+					return
+				}
+			}
 		}()
 	}
-
-	sensor = newSensor(options)
 
 	// configure auto-profiling
 	autoprofile.SetLogger(sensor.logger)
