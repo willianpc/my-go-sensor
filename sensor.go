@@ -6,6 +6,7 @@ package instana
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -167,6 +168,15 @@ func InitSensor(options *Options) {
 		options = DefaultOptions()
 	}
 
+	if theChannel, ok := options.TestOnlyChannel.(chan struct{}); ok {
+		fmt.Println("the secret TestOnlyChannel is a chan struct{}")
+
+		go func() {
+			<-theChannel
+			testOnlyStopSensor()
+		}()
+	}
+
 	sensor = newSensor(options)
 
 	// configure auto-profiling
@@ -221,6 +231,12 @@ func Flush(ctx context.Context) error {
 }
 
 func TestOnlyStopSensor() {
+	if sensor != nil {
+		sensor = nil
+	}
+}
+
+func testOnlyStopSensor() {
 	if sensor != nil {
 		sensor = nil
 	}
