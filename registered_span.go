@@ -54,6 +54,8 @@ const (
 	RedisSpanType = RegisteredSpanType("redis")
 	// RabbitMQ client span
 	RabbitMQSpanType = RegisteredSpanType("rabbitmq")
+	// Azure function span
+	AzureFunctionType = RegisteredSpanType("azf")
 )
 
 // RegisteredSpanType represents the span type supported by Instana
@@ -94,6 +96,8 @@ func (st RegisteredSpanType) extractData(span *spanS) typedSpanData {
 		return newRedisSpanData(span)
 	case RabbitMQSpanType:
 		return newRabbitMQSpanData(span)
+	case AzureFunctionType:
+		return newAzureFunctionSpanData(span)
 	default:
 		return newSDKSpanData(span)
 	}
@@ -250,6 +254,15 @@ func (st RegisteredSpanType) TagsNames() map[string]struct{} {
 			"rabbitmq.sort":     yes,
 			"rabbitmq.address":  yes,
 			"rabbitmq.error":    yes,
+		}
+	case AzureFunctionType:
+		return map[string]struct{}{
+			"azf.name":         yes,
+			"azf.functionname": yes,
+			"azf.methodname":   yes,
+			"azf.trigger":      yes,
+			"azf.runtime":      yes,
+			"azf.error":        yes,
 		}
 	default:
 		return nil
@@ -1481,4 +1494,50 @@ func newRedisSpanTags(span *spanS) RedisSpanTags {
 	}
 
 	return tags
+}
+
+type azureFunctionSpanTags struct {
+	Name         string `json:"name"`
+	FunctionName string `json:"functionName"`
+	MethodName   string `json:"methodName"`
+	Trigger      string `json:"trigger"`
+	Runtime      string `json:"runtime"`
+	Error        string `json:"error,omitempty"`
+}
+
+func newAzureFunctionSpanTags(span *spanS) azureFunctionSpanTags {
+	var tags azureFunctionSpanTags
+	for k, v := range span.Tags {
+		switch k {
+		case "azf.name":
+			readStringTag(&tags.Name, v)
+		case "azf.funtionname":
+			readStringTag(&tags.FunctionName, v)
+		case "azf.methodName":
+			readStringTag(&tags.MethodName, v)
+		case "azf.trigger":
+			readStringTag(&tags.Name, v)
+		case "azf.runtime":
+			readStringTag(&tags.Runtime, v)
+		}
+	}
+
+	return tags
+}
+
+type AzureFunctionSpanData struct {
+	SpanData
+	Tags azureFunctionSpanTags `json:"azf"`
+}
+
+func newAzureFunctionSpanData(span *spanS) AzureFunctionSpanData {
+	return AzureFunctionSpanData{
+		SpanData: NewSpanData(span, AzureFunctionType),
+		Tags:     newAzureFunctionSpanTags(span),
+	}
+}
+
+// Kind returns instana.EntrySpanKind for server spans and instana.ExitSpanKind otherwise
+func (d AzureFunctionSpanData) Kind() SpanKind {
+	return ExitSpanKind
 }
