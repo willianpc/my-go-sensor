@@ -97,7 +97,7 @@ func (st RegisteredSpanType) extractData(span *spanS) typedSpanData {
 	case RabbitMQSpanType:
 		return newRabbitMQSpanData(span)
 	case AzureFunctionType:
-		return newAzureFunctionSpanData(span)
+		return newAZFSpanData(span)
 	default:
 		return newSDKSpanData(span)
 	}
@@ -1496,27 +1496,27 @@ func newRedisSpanTags(span *spanS) RedisSpanTags {
 	return tags
 }
 
-type azureFunctionSpanTags struct {
+type AZFSpanTags struct {
 	Name         string `json:"name"`
-	FunctionName string `json:"functionName"`
-	MethodName   string `json:"methodName"`
+	FunctionName string `json:"functionname"`
+	MethodName   string `json:"methodname"`
 	Trigger      string `json:"trigger"`
 	Runtime      string `json:"runtime"`
 	Error        string `json:"error,omitempty"`
 }
 
-func newAzureFunctionSpanTags(span *spanS) azureFunctionSpanTags {
-	var tags azureFunctionSpanTags
+func newAZFSpanTags(span *spanS) AZFSpanTags {
+	var tags AZFSpanTags
 	for k, v := range span.Tags {
 		switch k {
 		case "azf.name":
 			readStringTag(&tags.Name, v)
 		case "azf.funtionname":
 			readStringTag(&tags.FunctionName, v)
-		case "azf.methodName":
+		case "azf.methodname":
 			readStringTag(&tags.MethodName, v)
 		case "azf.trigger":
-			readStringTag(&tags.Name, v)
+			readStringTag(&tags.Trigger, v)
 		case "azf.runtime":
 			readStringTag(&tags.Runtime, v)
 		}
@@ -1525,19 +1525,19 @@ func newAzureFunctionSpanTags(span *spanS) azureFunctionSpanTags {
 	return tags
 }
 
-type AzureFunctionSpanData struct {
+type AZFSpanData struct {
 	SpanData
-	Tags azureFunctionSpanTags `json:"azf"`
+	Tags AZFSpanTags `json:"azf"`
 }
 
-func newAzureFunctionSpanData(span *spanS) AzureFunctionSpanData {
-	return AzureFunctionSpanData{
+func newAZFSpanData(span *spanS) AZFSpanData {
+	return AZFSpanData{
 		SpanData: NewSpanData(span, AzureFunctionType),
-		Tags:     newAzureFunctionSpanTags(span),
+		Tags:     newAZFSpanTags(span),
 	}
 }
 
 // Kind returns instana.EntrySpanKind for server spans and instana.ExitSpanKind otherwise
-func (d AzureFunctionSpanData) Kind() SpanKind {
+func (d AZFSpanData) Kind() SpanKind {
 	return ExitSpanKind
 }

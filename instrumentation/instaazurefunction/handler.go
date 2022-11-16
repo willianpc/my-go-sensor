@@ -1,6 +1,10 @@
 // (c) Copyright IBM Corp. 2022
 // (c) Copyright Instana Inc. 2022
 
+//go:build go1.16
+
+// Package instaazurefunction provides Instana tracing instrumentation for
+// Microsoft Azure Functions
 package instaazurefunction
 
 import (
@@ -23,6 +27,7 @@ const (
 	azfTimeoutThreshold        = 100 * time.Millisecond
 )
 
+// WrapFunctionHandler wraps the http handler and add instrumentation data for the specified handlers
 func WrapFunctionHandler(sensor *instana.Sensor, handler http.HandlerFunc) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -107,6 +112,7 @@ func WrapFunctionHandler(sensor *instana.Sensor, handler http.HandlerFunc) http.
 	}
 }
 
+// flushAgent sends the instrumentation data to the serverless endpoint
 func flushAgent(sensor *instana.Sensor, retryPeriod time.Duration, maxRetries int) {
 	sensor.Logger().Debug("flushing trace data")
 
@@ -128,18 +134,3 @@ func flushAgent(sensor *instana.Sensor, retryPeriod time.Duration, maxRetries in
 		}
 	}
 }
-
-/*
-name : Function group name
-function name eg: azure function name
-method name eg: name of the handler function
-trigger eg: http, queue, timer etc.
-runtime eg: custom
-*/
-//func dummyApiToSetSpanDetails(reqPayload []byte, span opentracing.Span) {
-//	span.SetTag("azf.name", "sample azure function")
-//	span.SetTag("azf.functionname", "sample azure function name")
-//	span.SetTag("azf.methodname", "sample method name")
-//	span.SetTag("azf.trigger", "sample trigger name")
-//	span.SetTag("azf.runtime", "sample azure runtime")
-//}
