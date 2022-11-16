@@ -14,3 +14,5 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/instana/go-sensor => /Users/sanoj/all_files/work/projects/go-sensor

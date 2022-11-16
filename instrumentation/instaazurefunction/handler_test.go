@@ -1,10 +1,11 @@
 // (c) Copyright IBM Corp. 2022
 // (c) Copyright Instana Inc. 2022
 
-package instaazurefunction
+package instaazurefunction_test
 
 import (
 	"fmt"
+	"github.com/go-sensor/instrumentation/instaazurefunction"
 	instana "github.com/instana/go-sensor"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -17,10 +18,14 @@ func TestHttpTrigger(t *testing.T) {
 	recorder := instana.NewTestRecorder()
 	sensor := instana.NewSensorWithTracer(
 		instana.NewTracerWithEverything(instana.DefaultOptions(), recorder))
+	//defer instana.ShutdownSensor()
 
-	h := WrapFunctionHandler(sensor, func(writer http.ResponseWriter, request *http.Request) {
+	h := instaazurefunction.WrapFunctionHandler(sensor, func(writer http.ResponseWriter, request *http.Request) {
 		_, _ = fmt.Fprintln(writer, "Ok")
 	})
+
+	//sp := sensor.Tracer().StartSpan("testing")
+	//sp.Finish()
 
 	bodyReader := strings.NewReader(`{"Metadata":{"Headers":{"User-Agent":"curl/7.79.1"},"sys":{"MethodName":"roboshop"}}}`)
 	req := httptest.NewRequest(http.MethodPost, "/roboshop", bodyReader)
@@ -39,7 +44,7 @@ func TestHttpTrigger(t *testing.T) {
 
 	assert.Equal(t, "roboshop", data.Tags.MethodName)
 	assert.Equal(t, "custom", data.Tags.Runtime)
-	assert.Equal(t, httpTrigger, data.Tags.Trigger)
+	assert.Equal(t, "httpTrigger", data.Tags.Trigger)
 	assert.Equal(t, "", data.Tags.Name)
 	assert.Equal(t, "", data.Tags.FunctionName)
 }
@@ -76,7 +81,7 @@ func TestMultiTriggers(t *testing.T) {
 			sensor := instana.NewSensorWithTracer(
 				instana.NewTracerWithEverything(instana.DefaultOptions(), recorder))
 
-			h := WrapFunctionHandler(sensor, func(writer http.ResponseWriter, request *http.Request) {
+			h := instaazurefunction.WrapFunctionHandler(sensor, func(writer http.ResponseWriter, request *http.Request) {
 				_, _ = fmt.Fprintln(writer, "Ok")
 			})
 

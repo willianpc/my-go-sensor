@@ -1,8 +1,6 @@
 // (c) Copyright IBM Corp. 2022
 // (c) Copyright Instana Inc. 2022
 
-//go:build go1.16
-
 // Package instaazurefunction provides Instana tracing instrumentation for
 // Microsoft Azure Functions
 package instaazurefunction
