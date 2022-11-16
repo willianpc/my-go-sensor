@@ -4,9 +4,13 @@
 package instaazurefunction_test
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"github.com/go-sensor/instrumentation/instaazurefunction"
 	instana "github.com/instana/go-sensor"
+	"github.com/instana/go-sensor/acceptor"
+	"github.com/instana/go-sensor/autoprofile"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -17,8 +21,8 @@ import (
 func TestHttpTrigger(t *testing.T) {
 	recorder := instana.NewTestRecorder()
 	sensor := instana.NewSensorWithTracer(
-		instana.NewTracerWithEverything(instana.DefaultOptions(), recorder))
-	//defer instana.ShutdownSensor()
+		instana.NewTracerWithEverything(&instana.Options{AgentClient: alwaysReadyClient{}}, recorder))
+	defer instana.ShutdownSensor()
 
 	h := instaazurefunction.WrapFunctionHandler(sensor, func(writer http.ResponseWriter, request *http.Request) {
 		_, _ = fmt.Fprintln(writer, "Ok")
@@ -79,7 +83,7 @@ func TestMultiTriggers(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			recorder := instana.NewTestRecorder()
 			sensor := instana.NewSensorWithTracer(
-				instana.NewTracerWithEverything(instana.DefaultOptions(), recorder))
+				instana.NewTracerWithEverything(&instana.Options{AgentClient: alwaysReadyClient{}}, recorder))
 
 			h := instaazurefunction.WrapFunctionHandler(sensor, func(writer http.ResponseWriter, request *http.Request) {
 				_, _ = fmt.Fprintln(writer, "Ok")
@@ -108,3 +112,20 @@ func TestMultiTriggers(t *testing.T) {
 		})
 	}
 }
+
+type alwaysReadyClient struct{}
+
+func (alwaysReadyClient) Ready() bool {
+	return true
+}
+
+func (alwaysReadyClient) SendSpans(spans []instana.Span) error {
+	// Returning an error will result in placing the spans back in the queue of the recorder.
+	// Those can be used for asserting errors.
+	return errors.New("this is a mock agent clients. Cannot send data")
+}
+
+func (alwaysReadyClient) SendMetrics(data acceptor.Metrics) error           { return nil }
+func (alwaysReadyClient) SendEvent(event *instana.EventData) error          { return nil }
+func (alwaysReadyClient) SendProfiles(profiles []autoprofile.Profile) error { return nil }
+func (alwaysReadyClient) Flush(context.Context) error                       { return nil }
