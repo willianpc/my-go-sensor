@@ -6,7 +6,7 @@ package instaazurefunction
 import (
 	"fmt"
 	instana "github.com/instana/go-sensor"
-	"github.com/instana/testify/assert"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
