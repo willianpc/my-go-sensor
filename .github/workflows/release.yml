@@ -1,7 +1,7 @@
 name: Go Tracer Release
 on:
   # push:
-  pull_request:
+  # pull_request:
     branches:
       - release
     types: [opened, synchronize, reopened]
