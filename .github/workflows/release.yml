@@ -1,8 +1,22 @@
 name: Go Tracer Release
+# on:
+#   pull_request:
+#     branches:
+#       - release
+
 on:
-  pull_request:
-    branches:
-      - release
+  workflow_dispatch:
+    inputs:
+      packageName:
+        description: 'The package name of the instrumented package. Eg: instagorm'
+        required: true
+        default: 'instagin'
+        type: choice
+        options:
+        - instaredis
+        - instapgx
+        - instagorm
+
 jobs:
   job_one:
     name: Job One
@@ -11,5 +25,8 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
     - run: |
-        echo "Github repo info: ${{ github }}"
+        echo "Releasing $INSTANA_PACKAGE_NAME"
         git log -1 --name-only --oneline --pretty=format:
+
+      env:
+        INSTANA_PACKAGE_NAME: ${{ inputs.packageName }}
