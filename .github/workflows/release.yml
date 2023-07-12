@@ -1,6 +1,6 @@
 name: Go Tracer Release
 on:
-  push:
+  pull_request_target:
     branches:
       - release
   # pull_request:
