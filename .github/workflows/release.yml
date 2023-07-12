@@ -9,6 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-    echo "This echo only exists in the PR" \
-    exit 0
+      echo "This echo only exists in the PR" \
+      exit 0
 
