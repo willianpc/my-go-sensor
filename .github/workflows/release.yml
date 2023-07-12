@@ -10,5 +10,6 @@ jobs:
     steps:
     - run: |
         echo "This echo only exists in the PR" \
+        ls -la . \
         exit 1
 
