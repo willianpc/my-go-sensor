@@ -10,5 +10,5 @@ jobs:
     steps:
     - run: |
         echo "This echo only exists in the PR" \
-        exit 0
+        exit 1
 
