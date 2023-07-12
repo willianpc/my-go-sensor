@@ -8,7 +8,7 @@ jobs:
     name: Job One
     runs-on: ubuntu-latest
     steps:
-    - run: echo "Hello! This is a PR against the release branch :)"
+    - run: echo "This echo only exists in the PR"
       # - uses: actions/checkout@v3
       #   with:
       #     fetch-depth: 0
