@@ -8,6 +8,8 @@ jobs:
     name: Job One
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
     - run: |
         echo "This echo only exists in the PR"
         ls -la .
