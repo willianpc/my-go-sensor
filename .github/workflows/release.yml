@@ -11,6 +11,6 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
     - run: |
-        echo "This echo only exists in the PR"
+        echo "Github repo info: ${{ github.repository }}"
         ls -la .
-        exit 1
+        git log -1 || exit 0
