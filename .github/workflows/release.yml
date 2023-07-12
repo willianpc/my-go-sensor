@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo "This echo only exists in the PR" \
-        ls -la . \
+        apt update
+        echo "This echo only exists in the PR"
+        ls -la .
         exit 1
 
