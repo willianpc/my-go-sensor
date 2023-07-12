@@ -11,6 +11,5 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
     - run: |
-        echo "Github repo info: ${{ github.repository }}"
-        ls -la .
-        git log -1 || exit 0
+        echo "Github repo info: ${{ github }}"
+        git log -1 --name-only --oneline --pretty=format:
