@@ -3,7 +3,7 @@ name: Update instrumentations to latest core
 on:
   release:
     types:
-      [published]
+      [released]
     # secrets:
     #   GITHUB_TOKEN:
     #     description: 'Github Token'
