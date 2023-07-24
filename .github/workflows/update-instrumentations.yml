@@ -1,0 +1,30 @@
+name: Update instrumentations to latest core
+
+on:
+  release:
+    types:
+      [published]
+    # secrets:
+    #   GITHUB_TOKEN:
+    #     description: 'Github Token'
+
+jobs:
+  updade_instrumentations:
+    name: Update instrumentations
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout repo
+      with:
+        fetch-depth: 0
+    - name: Check if is core
+      run: |
+        echo "Released tag is (clean): ${GITHUB_REF}"
+        echo "Released tag is (with sufix): ${GITHUB_REF#refs/*/}"
+
+      # shell: bash {0}
+      # env:
+      #   INSTANA_PACKAGE_NAME: ${{ inputs.packageName }}
+      #   LIB_VERSION_TYPE: ${{ inputs.versionType }}
+      #   RELEASE_AS_DRAFT: ${{ inputs.asDraft }}
+      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
