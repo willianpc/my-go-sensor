@@ -28,8 +28,6 @@ jobs:
         # List of instrumentation folders
         LIB_LIST=$(find ./instrumentation -name go.mod -exec dirname {} \; | grep -E -v "$EXCLUDED_DIRS")
 
-        #git log -1
-
         git config user.name "IBM/Instana/Team Go"
         git config user.email "github-actions@github.com"
         git checkout -b update-instrumentations-core-"$CORE_TAG" || git checkout update-instrumentations-core-"$CORE_TAG"
@@ -50,7 +48,6 @@ jobs:
 
     - name: Create PR
       run: |
-        gh --version
         CORE_TAG=${{ steps.create-branch.outputs.CORE_TAG }}
         git checkout update-instrumentations-core-"$CORE_TAG"
         gh pr create --title "Updating instrumentations to core module $CORE_TAG" --body "This PR updates all instrumented packages to use the latest core module $CORE_TAG" --head $(git branch --show-current)
