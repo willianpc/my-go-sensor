@@ -15,18 +15,23 @@ jobs:
       with:
         fetch-depth: 0
     - name: Extract core version
+      id: core-tag
       run: |
         export CORE_TAG=$(git tag -l "v1.*" | sort -V | tail -n1)
+        echo "CORE_TAG=$CORE_TAG" >> $GITHUB_OUTPUT
         echo "New core version is $CORE_TAG"
     - name: Extract list of instrumentations
+      id: lib-list
       run: |
         export EXCLUDED_DIRS="\/.*\/example"
         # List of instrumentation folders
         export LIB_LIST=$(find ./instrumentation -name go.mod -exec dirname {} \; | grep -E -v "$EXCLUDED_DIRS")
+        echo "LIB_LIST=$LIB_LIST" >> $GITHUB_OUTPUT
 
       shell: bash {0}
     - name: Setup branch
       run: |
+        CORE_TAG=${{ steps.core-tag.outputs.CORE_TAG }}
         git config user.name "IBM/Instana/Team Go"
         git config user.email "github-actions@github.com"
         git checkout -b update-instrumentations-core-"$CORE_TAG" || git checkout update-instrumentations-core-"$CORE_TAG"
@@ -34,6 +39,9 @@ jobs:
         git branch
     - name: Update files in branch
       run: |
+        CORE_TAG=${{ steps.core-tag.outputs.CORE_TAG }}
+        LIB_LIST=${{ steps.lib-list.outputs.LIB_LIST }}
+
         #!/bin/bash
 
         echo "do I still have lib list? $LIB_LIST"
