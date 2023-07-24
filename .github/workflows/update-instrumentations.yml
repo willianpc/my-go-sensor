@@ -19,13 +19,22 @@ jobs:
         fetch-depth: 0
     - name: Check if is core
       run: |
-        echo "Released tag is (clean): ${GITHUB_REF}"
-        echo "Released tag is (with sufix): ${GITHUB_REF#refs/*/}"
-        git tag -l "v1.*" | sort -V | tail -n1
+        CORE_TAG=$(git tag -l "v1.*" | sort -V | tail -n1)
+        echo "New core version is $CORE_TAG"
 
-      # shell: bash {0}
+        #!/bin/bash
+
+        EXCLUDED_DIRS="\/.*\/example"
+
+        # List of instrumentation folders
+        LIB_LIST=$(find ./instrumentation -name go.mod -exec dirname {} \; | grep -E -v "$EXCLUDED_DIRS")
+
+        # Updates all instrumentations to use the @latest version of the core module
+        for lib in $LIB_LIST
+          do sed -i "s|github\.com\/instana\/go-sensor v.*|github\.com\/instana\/go-sensor ${CORE_TAG}|" "$lib"/go.mod
+        done
+
+        git status
+
       # env:
-      #   INSTANA_PACKAGE_NAME: ${{ inputs.packageName }}
-      #   LIB_VERSION_TYPE: ${{ inputs.versionType }}
-      #   RELEASE_AS_DRAFT: ${{ inputs.asDraft }}
       #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
