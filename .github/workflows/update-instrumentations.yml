@@ -47,11 +47,11 @@ jobs:
       with:
         github_token: ${{ github.token }}
         branch: update-instrumentations-core-${{ steps.create-branch.outputs.CORE_TAG }}
-        # branch: ${{ github.ref }}
 
     - name: Create PR
       run: |
         CORE_TAG=${{ steps.create-branch.outputs.CORE_TAG }}
+        git checkout update-instrumentations-core-"$CORE_TAG"
         gh pr create --title "Updating instrumentations to core module $CORE_TAG" --body "This PR updates all instrumented packages to use the latest core module $CORE_TAG"
       env:
         GH_TOKEN: ${{ github.token }}
