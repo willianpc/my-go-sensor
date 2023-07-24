@@ -26,6 +26,9 @@ jobs:
         # List of instrumentation folders
         LIB_LIST=$(find ./instrumentation -name go.mod -exec dirname {} \; | grep -E -v "$EXCLUDED_DIRS")
 
+        echo "updating main branch before creating branch"
+        git pull
+
         # Updates all instrumentations to use the @latest version of the core module
         for lib in $LIB_LIST
           do sed -i "s|github\.com\/instana\/go-sensor v.*|github\.com\/instana\/go-sensor ${CORE_TAG}|" "$lib"/go.mod
@@ -34,7 +37,13 @@ jobs:
         git config user.name "IBM/Instana/Team Go"
         git config user.email "github-actions@github.com"
 
+
+
         git checkout -b update-instrumentations-core-"$CORE_TAG" || git checkout update-instrumentations-core-"$CORE_TAG"
+
+        echo "updating branch branch before adding modified files"
+        git pull
+
         git add .
         git commit -m "Updating instrumentations to core module $CORE_TAG"
         git push origin update-instrumentations-core-"$CORE_TAG"
