@@ -16,13 +16,15 @@ jobs:
         fetch-depth: 0
     - name: Extract core version
       run: |
-        CORE_TAG=$(git tag -l "v1.*" | sort -V | tail -n1)
+        export CORE_TAG=$(git tag -l "v1.*" | sort -V | tail -n1)
         echo "New core version is $CORE_TAG"
     - name: Extract list of instrumentations
       run: |
-        EXCLUDED_DIRS="\/.*\/example"
+        export EXCLUDED_DIRS="\/.*\/example"
         # List of instrumentation folders
-        LIB_LIST=$(find ./instrumentation -name go.mod -exec dirname {} \; | grep -E -v "$EXCLUDED_DIRS")
+        export LIB_LIST=$(find ./instrumentation -name go.mod -exec dirname {} \; | grep -E -v "$EXCLUDED_DIRS")
+
+      shell: bash {0}
     - name: Setup branch
       run: |
         git config user.name "IBM/Instana/Team Go"
@@ -33,6 +35,8 @@ jobs:
     - name: Update files in branch
       run: |
         #!/bin/bash
+
+        echo "do I still have lib list? $LIB_LIST"
 
         for lib in $LIB_LIST
           do sed -i "s|github\.com\/instana\/go-sensor v.*|github\.com\/instana\/go-sensor ${CORE_TAG}|" "$lib"/go.mod
