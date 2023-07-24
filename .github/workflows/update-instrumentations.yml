@@ -18,6 +18,7 @@ jobs:
       id: create-branch
       run: |
         CORE_TAG=$(git tag -l "v1.*" | sort -V | tail -n1)
+        go get github.com/instana/go-sensor@"$CORE_TAG"
         echo "CORE_TAG=$CORE_TAG" >> $GITHUB_OUTPUT
         echo "New core version is $CORE_TAG"
 
