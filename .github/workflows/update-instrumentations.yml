@@ -1,13 +1,10 @@
-name: Update instrumentations to latest core
-run-name: Updating instrumented packages to core $CORE_TAG
+name: Update all instrumentations PR
+run-name: Updating instrumented packages to core ${{ CORE_TAG }}
 
 on:
   workflow_run:
     workflows: ["Go Tracer Release"]
     types: [completed]
-    # secrets:
-    #   GITHUB_TOKEN:
-    #     description: 'Github Token'
 
 jobs:
   updade_instrumentations:
@@ -43,8 +40,7 @@ jobs:
         git commit -m "Updating instrumentations to core module $CORE_TAG"
         git push origin update-instrumentations-core-"$CORE_TAG"
 
-        gh pr checkout update-instrumentations-core-"$CORE_TAG"
+        gh pr create update-instrumentations-core-"$CORE_TAG"
 
       env:
         GH_TOKEN: ${{ github.token }}
-      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
