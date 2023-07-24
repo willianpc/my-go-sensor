@@ -37,11 +37,12 @@ jobs:
         git config user.name "IBM/Instana/Team Go"
         git config user.email "github-actions@github.com"
 
-        git checkout -b update-instrumentations-core-"$CORE_TAG"
+        git checkout -b update-instrumentations-core-"$CORE_TAG" || git checkout update-instrumentations-core-"$CORE_TAG"
         git add .
         git commit -m "Updating instrumentations to core module $CORE_TAG"
         git push origin @
-        
+
+        gh pr checkout update-instrumentations-core-"$CORE_TAG"
 
       # env:
       #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
