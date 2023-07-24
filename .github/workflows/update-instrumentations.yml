@@ -44,5 +44,6 @@ jobs:
 
         gh pr checkout update-instrumentations-core-"$CORE_TAG"
 
-      # env:
+      env:
+        GH_TOKEN: ${{ github.token }}
       #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
