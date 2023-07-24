@@ -42,15 +42,12 @@ jobs:
         git add .
         git commit -m "Updating instrumentations to core module $CORE_TAG"
 
-    # - name: Push branch upstream
-    #   run: |
-    #     CORE_TAG=${{ steps.create-branch.outputs.CORE_TAG }}
-    #     git push origin update-instrumentations-core-"$CORE_TAG"
-
     - name: Push branch
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ github.token }}
+        branch: ${{ github.ref }}
+        # branch: update-instrumentations-core-${{ steps.create-branch.outputs.CORE_TAG }}
 
     - name: Create PR
       run: |
