@@ -21,6 +21,7 @@ jobs:
       run: |
         echo "Released tag is (clean): ${GITHUB_REF}"
         echo "Released tag is (with sufix): ${GITHUB_REF#refs/*/}"
+        git tag -l "v1.*" | sort -V | tail -n1
 
       # shell: bash {0}
       # env:
