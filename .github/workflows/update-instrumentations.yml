@@ -28,6 +28,7 @@ jobs:
 
         echo "updating main branch before creating branch"
         git pull
+        git log -1
 
         # Updates all instrumentations to use the @latest version of the core module
         for lib in $LIB_LIST
@@ -38,11 +39,10 @@ jobs:
         git config user.email "github-actions@github.com"
 
 
-
         git checkout -b update-instrumentations-core-"$CORE_TAG" || git checkout update-instrumentations-core-"$CORE_TAG"
 
-        echo "updating branch branch before adding modified files"
-        git pull
+        echo "rebase main"
+        git rebase main
 
         git add .
         git commit -m "Updating instrumentations to core module $CORE_TAG"
