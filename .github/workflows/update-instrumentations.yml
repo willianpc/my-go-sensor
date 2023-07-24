@@ -1,9 +1,9 @@
 name: Update instrumentations to latest core
 
 on:
-  release:
-    types:
-      [released, published, created, prereleased]
+  workflow_run:
+    workflows: ["Go Tracer Release"]
+    types: [completed]
     # secrets:
     #   GITHUB_TOKEN:
     #     description: 'Github Token'
