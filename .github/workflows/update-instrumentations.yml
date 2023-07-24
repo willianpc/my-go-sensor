@@ -46,8 +46,8 @@ jobs:
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ github.token }}
-        branch: ${{ github.ref }}
-        # branch: update-instrumentations-core-${{ steps.create-branch.outputs.CORE_TAG }}
+        branch: update-instrumentations-core-${{ steps.create-branch.outputs.CORE_TAG }}
+        # branch: ${{ github.ref }}
 
     - name: Create PR
       run: |
