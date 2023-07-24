@@ -34,7 +34,11 @@ jobs:
           do sed -i "s|github\.com\/instana\/go-sensor v.*|github\.com\/instana\/go-sensor ${CORE_TAG}|" "$lib"/go.mod
         done
 
-        git status
+        git checkout -b update-instrumentations-core-"$CORE_TAG"
+        git add .
+        git commit -m "Updating instrumentations to core module $CORE_TAG"
+        git push origin @
+        
 
       # env:
       #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
