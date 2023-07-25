@@ -1,9 +1,9 @@
 name: Update all instrumentations PR
 
 on:
-  workflow_run:
-    workflows: ["Go Tracer Release"]
-    types: [completed]
+  workflow_dispatch:
+    # workflows: ["Go Tracer Release"]
+    # types: [completed]
 
 jobs:
   updade_instrumentations:
@@ -17,12 +17,6 @@ jobs:
     - name: Creating branch
       id: create-branch
       run: |
-        git fetch --unshallow || echo "would have crashed"
-        git branch --show-current
-        git checkout main
-        git pull
-        git log -1
-        LALALA=$(git tag -l "v1.*" | sort -V | tail -n1)
         CORE_TAG=$(git tag -l "v1.*" | sort -V | tail -n1)
 
         echo "CORE_TAG=$CORE_TAG" >> $GITHUB_OUTPUT
@@ -41,7 +35,7 @@ jobs:
 
         # Updates all instrumentations to use the @latest version of the core module
         for lib in $LIB_LIST
-          do sed -i "s|github\.com\/instana\/go-sensor v.*|github\.com\/instana\/go-sensor ${CORE_TAG}|" "$lib"/go.mod
+          do cd "$lib" && go mod edit -droprequire github.com/instana/go-sensor && go get github.com/instana/go-sensor@$CORE_TAG && go mod tidy && cd -;
         done
 
         git add .
