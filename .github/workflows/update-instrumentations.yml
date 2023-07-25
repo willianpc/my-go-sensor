@@ -17,6 +17,7 @@ jobs:
     - name: Creating branch
       id: create-branch
       run: |
+        git fetch --unshallow || echo "would have crashed"
         git branch --show-current
         git checkout main
         git pull
