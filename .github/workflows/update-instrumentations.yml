@@ -22,7 +22,7 @@ jobs:
         git checkout main
         git pull
         git log -1
-        git tag -l "v1.*"
+        git tag -l "v1.*" | sort -V | tail -n1
         CORE_TAG=$(git tag -l "v1.*" | sort -V | tail -n1)
 
         cd instrumentation/instaredis
