@@ -14,11 +14,12 @@ jobs:
       name: Checkout repo
       with:
         fetch-depth: 0
-    - name: force exit 0
-      run: echo "expected to end pipeline with success" && exit 0
     - name: Creating branch
       id: create-branch
       run: |
+        git branch --show-current
+        git checkout main
+        git pull
         CORE_TAG=$(git tag -l "v1.*" | sort -V | tail -n1)
 
         cd instrumentation/instaredis
