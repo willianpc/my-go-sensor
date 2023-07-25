@@ -25,12 +25,6 @@ jobs:
         LALALA=$(git tag -l "v1.*" | sort -V | tail -n1)
         CORE_TAG=$(git tag -l "v1.*" | sort -V | tail -n1)
 
-        echo "lala: $LALALA, core tag: $CORE_TAG"
-
-        cd instrumentation/instaredis
-        go get github.com/instana/go-sensor@"$LALALA"
-        cd ../..
-
         echo "CORE_TAG=$CORE_TAG" >> $GITHUB_OUTPUT
         echo "New core version is $CORE_TAG"
 
