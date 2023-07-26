@@ -3,7 +3,7 @@ name: TEST release all packages
 on:
   pull_request:
     branches:
-    - 'update-instrumentations-core-*'
+    - 'update-instrumentations-core-v*'
     types:
       - closed
 
