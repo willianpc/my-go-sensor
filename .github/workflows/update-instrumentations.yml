@@ -31,9 +31,8 @@ jobs:
 
         git config user.name "IBM/Instana/Team Go"
         git config user.email "github-actions@github.com"
-        git checkout -b update-instrumentations-core-"$CORE_TAG" || git checkout update-instrumentations-core-"$CORE_TAG"
+        git checkout update-instrumentations-core-"$CORE_TAG" || git checkout -b update-instrumentations-core-"$CORE_TAG"
 
-        echo "attempt to pull"
         git pull origin "update-instrumentations-core-$CORE_TAG"
 
         # Updates all instrumentations to use the @latest version of the core module
