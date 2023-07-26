@@ -31,8 +31,6 @@ jobs:
         # List of instrumentation folders
         LIB_LIST=$(find ./instrumentation -name go.mod -exec dirname {} \; | grep -E -v "$EXCLUDED_DIRS")
 
-        echo "List of packages: $LIB_LIST"
-
         TAGS=""
         for lib in $LIB_LIST
           do LIB_PATH="$(echo "$lib" | sed 's/\.\///')"
@@ -90,7 +88,7 @@ jobs:
           --title "$t" \
           --notes "Updated instrumentation with the latest version of go-sensor core module $CORE_TAG.<br/><br/> --auto-generated--"
         done
-
+      shell: bash {0}
       env:
         GH_TOKEN: ${{ github.token }}
 
