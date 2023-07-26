@@ -4,13 +4,12 @@ on:
   pull_request:
     branches:
     - main
-    # - 'update-instrumentations-core/**'
     types:
       - closed
 
 jobs:
   release_if_merged:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'update-instrumentations-core')
     runs-on: ubuntu-latest
     steps:
     - run: |
