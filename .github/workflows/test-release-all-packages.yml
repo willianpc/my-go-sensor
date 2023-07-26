@@ -1,0 +1,16 @@
+name: TEST release all packages
+
+on:
+  pull_request:
+    branches:
+    - 'update-instrumentations-core-*'
+    types:
+      - closed
+
+jobs:
+  release_if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo The PR was merged

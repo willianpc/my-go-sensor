@@ -15,7 +15,7 @@ jobs:
       name: Checkout repo
       with:
         fetch-depth: 0
-    - name: A better name here later, pls
+    - name: Release all packages
       id: release-packages
       run: |
         CORE_TAG=$(git tag -l "v1.*" | sort -V | tail -n1)
@@ -73,7 +73,7 @@ jobs:
         # Commit all version.go files to the main branch
         git add ./instrumentation/**/version.go
         git add ./instrumentation/**/**/version.go
-        git commit -m "Bumping new version of the instrumentation"
+        git commit -m "Updated instrumented packages with core module $CORE_TAG"
         git push origin @
 
         echo "Creating tags for each instrumentation"
@@ -91,16 +91,3 @@ jobs:
       shell: bash {0}
       env:
         GH_TOKEN: ${{ github.token }}
-
-
-    # - name: Push branch
-    #   uses: ad-m/github-push-action@master
-    #   with:
-    #     github_token: ${{ github.token }}
-    #     branch: update-instrumentations-core-${{ steps.create-branch.outputs.CORE_TAG }}
-
-    # - name: Create PR
-    #   run: |
-    #     CORE_TAG=${{ steps.create-branch.outputs.CORE_TAG }}
-    #     git checkout update-instrumentations-core-"$CORE_TAG"
-    #     gh pr create --title "Updating instrumentations to core module $CORE_TAG" --body "This PR updates all instrumented packages to use the latest core module $CORE_TAG." --head $(git branch --show-current)
