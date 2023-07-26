@@ -44,7 +44,7 @@ jobs:
         RELEASE_AS_DRAFT: ${{ inputs.asDraft }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    -name: Slack post if not draft
+    - name: Slack post if not draft
       run: |
         #!/bin/bash
 
