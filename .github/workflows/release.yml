@@ -45,17 +45,22 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Slack post if not draft
-      if: ${{ inputs.asDraft }} == 'false'
       run: |
         #!/bin/bash
 
-        if [ "$RELEASE_AS_DRAFT" = "true" ]; then
-          echo "Draft, do not post on slack"
-        else
-          echo "Release done, no draft, do post on slack"
+        if [ "$RELEASE_AS_DRAFT" = "false" ]; then
+          echo "Release done, no draft, do post on slack: INSTANA_PACKAGE_NAME"
+
+          RES=$(echo ${{ github.event.release.name }} | grep -c 'instrumentation/')
+          NOTES=$(echo ${{ github.event.release.body }} | grep -c '--auto-generated--')
+
+          echo "Res=$RES, Notes=$NOTES"
         fi
       env:
         INSTANA_PACKAGE_NAME: ${{ inputs.packageName }}
         LIB_VERSION_TYPE: ${{ inputs.versionType }}
         RELEASE_AS_DRAFT: ${{ inputs.asDraft }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        SLACK_RELEASE_CHANNEL_ID: ${{ secrets.SLACK_RELEASE_CHANNEL_ID }}
+
