@@ -1,0 +1,95 @@
+# This workflow releases all instrumented packages updated to point to the latest core module.
+# It should run in the main branch after the PR created by the `Update all instrumentations PR` workflow is merged to main.
+
+name: Update all instrumentations RELEASE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release_instrumentations:
+    name: Release instrumentations
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout repo
+      with:
+        fetch-depth: 0
+    - name: A better name here later, pls
+      id: release-packages
+      run: |
+        CORE_TAG=$(git tag -l "v1.*" | sort -V | tail -n1)
+
+        TAGS=""
+        for lib in $LIB_LIST
+          do LIB_PATH="$(echo "$lib" | sed 's/\.\///')"
+
+          # Expected to find something like: instrumentation/instaredis/v1.5.0
+          # This option will be used if the instrumentation has no v2 subfolder
+          TAG_TO_SEARCH="$LIB_PATH/v[0-1].*"
+
+          # Expected to identify packages with subfolders. eg: instrumentation/instaredis/v2
+          NEW_VERSION_FOLDER=$(echo "$lib" | grep -E "v[2-9].*")
+
+          # If NEW_VERSION_FOLDER has something we update TAG_TO_SEARCH
+          if [ -n "$NEW_VERSION_FOLDER" ]; then
+            # Expected to be a version. eg: 1.5.0
+            NEW_MAJOR_VERSION=$(echo "$NEW_VERSION_FOLDER" | sed "s/.*v//")
+
+            # Expected to be tag name with major version higher than 1. eg: instrumentation/instaredis/v2.1.0
+            TAG_TO_SEARCH="$LIB_PATH/v$NEW_MAJOR_VERSION.*"
+          fi
+
+          VERSION=$(git tag -l "$TAG_TO_SEARCH" | sort -V | tail -n1 | sed "s/.*v//")
+
+          if [ -z "$VERSION" ]; then
+            VERSION="0.0.0"
+          fi
+
+          MINOR_VERSION=$(echo "$VERSION" | sed -En 's/[0-9]+\.([0-9]+)\.[0-9]+/\1/p')
+          MAJOR_VERSION=$(echo "$VERSION" | sed -En 's/([0-9]+)\.[0-9]+\.[0-9]+/\1/p')
+          MINOR_VERSION=$((MINOR_VERSION+1))
+          NEW_VERSION="$MAJOR_VERSION.$MINOR_VERSION.0"
+
+          # Updates the minor version in version.go
+          sed -i -E "s/[0-9]+\.[0-9]+\.[0-9]+/${NEW_VERSION}/" "$lib"/version.go | tail -1
+
+          # Tags to be created after version.go is merged to the main branch with the new version
+          PATH_WITHOUT_V=$(echo "$LIB_PATH" | sed "s/\/v[0-9]*//")
+          TAGS="$TAGS $PATH_WITHOUT_V/v$MAJOR_VERSION.$MINOR_VERSION.0"
+        done
+
+        # Commit all version.go files to the main branch
+        git add ./instrumentation/**/version.go
+        git add ./instrumentation/**/**/version.go
+        git commit -m "Bumping new version of the instrumentation"
+        git push origin @
+
+        echo "Creating tags for each instrumentation"
+
+        for t in $TAGS
+          do git tag "$t" && git push origin "$t"
+        done
+
+        # Release every instrumentation
+        for t in $TAGS
+          do gh release create "$t" \
+          --title "$t" \
+          --notes "Updated instrumentation with the latest version of go-sensor core module $CORE_TAG.<br/><br/> --auto-generated--"
+        done
+
+
+
+    # - name: Push branch
+    #   uses: ad-m/github-push-action@master
+    #   with:
+    #     github_token: ${{ github.token }}
+    #     branch: update-instrumentations-core-${{ steps.create-branch.outputs.CORE_TAG }}
+
+    # - name: Create PR
+    #   run: |
+    #     CORE_TAG=${{ steps.create-branch.outputs.CORE_TAG }}
+    #     git checkout update-instrumentations-core-"$CORE_TAG"
+    #     gh pr create --title "Updating instrumentations to core module $CORE_TAG" --body "This PR updates all instrumented packages to use the latest core module $CORE_TAG." --head $(git branch --show-current)
+    #   env:
+    #     GH_TOKEN: ${{ github.token }}
