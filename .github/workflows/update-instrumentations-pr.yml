@@ -33,9 +33,9 @@ jobs:
 
         git config user.name "IBM/Instana/Team Go"
         git config user.email "github-actions@github.com"
-        git checkout update-instrumentations-core-"$CORE_TAG" || git checkout -b update-instrumentations-core-"$CORE_TAG"
+        git checkout update-instrumentations-core/"$CORE_TAG" || git checkout -b update-instrumentations-core/"$CORE_TAG"
 
-        git pull origin "update-instrumentations-core-$CORE_TAG" || echo "Brand new branch. No need to pull from origin."
+        git pull origin "update-instrumentations-core/$CORE_TAG" || echo "Brand new branch. No need to pull from origin."
 
         # Updates all instrumentations to use the @latest version of the core module
         for lib in $LIB_LIST
@@ -49,12 +49,12 @@ jobs:
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ github.token }}
-        branch: update-instrumentations-core-${{ steps.create-branch.outputs.CORE_TAG }}
+        branch: update-instrumentations-core/${{ steps.create-branch.outputs.CORE_TAG }}
 
     - name: Create PR
       run: |
         CORE_TAG=${{ steps.create-branch.outputs.CORE_TAG }}
-        git checkout update-instrumentations-core-"$CORE_TAG"
+        git checkout update-instrumentations-core/"$CORE_TAG"
         gh pr create --title "Updating instrumentations to core module $CORE_TAG" --body "This PR updates all instrumented packages to use the latest core module $CORE_TAG." --head $(git branch --show-current)
       env:
         GH_TOKEN: ${{ github.token }}
