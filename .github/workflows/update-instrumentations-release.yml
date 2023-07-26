@@ -78,6 +78,8 @@ jobs:
           --notes "Updated instrumentation with the latest version of go-sensor core module $CORE_TAG.<br/><br/> --auto-generated--"
         done
 
+      env:
+        GH_TOKEN: ${{ github.token }}
 
 
     # - name: Push branch
@@ -91,5 +93,3 @@ jobs:
     #     CORE_TAG=${{ steps.create-branch.outputs.CORE_TAG }}
     #     git checkout update-instrumentations-core-"$CORE_TAG"
     #     gh pr create --title "Updating instrumentations to core module $CORE_TAG" --body "This PR updates all instrumented packages to use the latest core module $CORE_TAG." --head $(git branch --show-current)
-    #   env:
-    #     GH_TOKEN: ${{ github.token }}
