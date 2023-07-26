@@ -46,12 +46,34 @@ jobs:
 
     - name: Slack post if not draft
       if: "${{ success() && inputs.asDraft == 'false' }}"
-      run: |
-        #!/bin/bash
-
-        if [ "$RELEASE_AS_DRAFT" = "false" ]; then
-          echo "Release done, no draft, do post on slack: $INSTANA_PACKAGE_NAME"
-        fi
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.SLACK_RELEASE_CHANNEL_ID }}
+          payload: |
+            {
+              "text": ":mega: *Go Tracer team* : Version ${{ env.INSTANA_PACKAGE_NAME" }} of go-sensor :package: has been released.",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":mega: *Go Tracer team* : Version ${{ env.INSTANA_PACKAGE_NAME }} of go-sensor :package: has been released."
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*URL:* <${{ github.event.release.html_url }}|${{ github.event.release.html_url }}>"
+                  }
+                }
+              ]
+            }
+      # run: |
+      #   echo "Release done, no draft, do post on slack: $INSTANA_PACKAGE_NAME"
       env:
         INSTANA_PACKAGE_NAME: ${{ inputs.packageName }}
         LIB_VERSION_TYPE: ${{ inputs.versionType }}
