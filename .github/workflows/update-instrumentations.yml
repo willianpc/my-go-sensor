@@ -33,7 +33,7 @@ jobs:
         git config user.email "github-actions@github.com"
         git checkout update-instrumentations-core-"$CORE_TAG" || git checkout -b update-instrumentations-core-"$CORE_TAG"
 
-        git pull origin "update-instrumentations-core-$CORE_TAG"
+        git pull origin "update-instrumentations-core-$CORE_TAG" || echo "Brand new branch. No need to pull from origin."
 
         # Updates all instrumentations to use the @latest version of the core module
         for lib in $LIB_LIST
