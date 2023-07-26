@@ -15,5 +15,7 @@ jobs:
     steps:
     - run: |
         echo "The PR was merged: $GITHUB_REF"
-        echo "with { ${GITHUB_REF}"
-        echo "with { and refs/  ${GITHUB_REF#refs/*/}"
+        echo "lala: $LALA"
+
+      env:
+        LALA: ${{ github.event.pull_request.head.ref }}
