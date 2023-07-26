@@ -32,7 +32,6 @@ jobs:
         git config user.name "IBM/Instana/Team Go"
         git config user.email "github-actions@github.com"
         git checkout -b update-instrumentations-core-"$CORE_TAG" || git checkout update-instrumentations-core-"$CORE_TAG"
-        git pull
 
         # Updates all instrumentations to use the @latest version of the core module
         for lib in $LIB_LIST
@@ -52,6 +51,6 @@ jobs:
       run: |
         CORE_TAG=${{ steps.create-branch.outputs.CORE_TAG }}
         git checkout update-instrumentations-core-"$CORE_TAG"
-        gh pr create --title "Updating instrumentations to core module $CORE_TAG" --body "This PR updates all instrumented packages to use the latest core module $CORE_TAG" --head $(git branch --show-current)
+        gh pr create --title "Updating instrumentations to core module $CORE_TAG" --body "This PR updates all instrumented packages to use the latest core module $CORE_TAG.<br/><br/> --auto-generated--" --head $(git branch --show-current)
       env:
         GH_TOKEN: ${{ github.token }}
