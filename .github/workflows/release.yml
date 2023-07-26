@@ -45,6 +45,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Slack post if not draft
+      if: ${{ inputs.asDraft }} == false
       run: |
         #!/bin/bash
 
