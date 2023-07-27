@@ -99,6 +99,12 @@ jobs:
       run: |
         #!/bin/bash
 
-        for t in ${{ steps.releaser.outputs.TAGS }}
+        mkdir dummy && cd dummy
+        go mod init example.com
+        echo "get packages..."
+        cd ..
+        rm -rf dummy
+
+        for t in ${{ steps.release-packages.outputs.TAGS }}
           do echo "$t" | sed 's/\/v/@v/'
         done
