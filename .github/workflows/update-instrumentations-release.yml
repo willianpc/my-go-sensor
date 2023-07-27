@@ -104,7 +104,7 @@ jobs:
         echo "get packages..."
 
         for t in ${{ steps.release-packages.outputs.TAGS }}
-          do go get github.com/instana/go-sensor/$(echo "$t" | sed 's/\/v/@v/')
+          do go get github.com/instana/go-sensor/$(echo "$t" | sed 's/\/v/@v/') || echo "Error getting package $t, but moving forward..."
         done
 
         cd ..
