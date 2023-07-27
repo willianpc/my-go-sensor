@@ -71,6 +71,8 @@ jobs:
           TAGS="$TAGS $PATH_WITHOUT_V/v$MAJOR_VERSION.$MINOR_VERSION.0"
         done
 
+        echo "TAGS=$TAGS" >> "$GITHUB_OUTPUT"
+
         # Commit all version.go files to the main branch
         git add ./instrumentation/**/version.go
         git add ./instrumentation/**/**/version.go
@@ -92,3 +94,11 @@ jobs:
       shell: bash {0}
       env:
         GH_TOKEN: ${{ github.token }}
+
+    - name: Update pkg.go.dev
+      run: |
+        #!/bin/bash
+
+        for t in ${{ steps.releaser.outputs.TAGS }}
+          do echo "$t" | sed 's/\/v/@v/'
+        done

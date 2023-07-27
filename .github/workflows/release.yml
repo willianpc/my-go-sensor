@@ -91,10 +91,6 @@ jobs:
             ]
           }
       env:
-        INSTANA_PACKAGE_NAME: ${{ inputs.packageName }}
-        LIB_VERSION_TYPE: ${{ inputs.versionType }}
-        RELEASE_AS_DRAFT: ${{ inputs.asDraft }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         SLACK_RELEASE_CHANNEL_ID: ${{ secrets.SLACK_RELEASE_CHANNEL_ID }}
 
