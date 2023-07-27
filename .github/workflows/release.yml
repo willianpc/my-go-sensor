@@ -51,9 +51,9 @@ jobs:
         #!/bin/bash
 
         if [ ${{ steps.releaser.outputs.RELEASE_PACKAGE }} = "go-sensor" ]; then
-          GO_PKG="go get github.com/instana/go-sensor@${{ steps.releaser.outputs.RELEASE_VERSION }}"
+          GO_PKG="github.com/instana/go-sensor@${{ steps.releaser.outputs.RELEASE_VERSION }}"
         else
-          GO_PKG="go get github.com/instana/go-sensor/instrumentation/${{ steps.releaser.outputs.RELEASE_PACKAGE }}@${{ steps.releaser.outputs.RELEASE_VERSION }}"
+          GO_PKG="github.com/instana/go-sensor/instrumentation/${{ steps.releaser.outputs.RELEASE_PACKAGE }}@${{ steps.releaser.outputs.RELEASE_VERSION }}"
         fi
 
         mkdir dummy && cd dummy
