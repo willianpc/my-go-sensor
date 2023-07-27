@@ -51,10 +51,16 @@ jobs:
         #!/bin/bash
 
         if [ ${{ steps.releaser.outputs.RELEASE_PACKAGE }} = "go-sensor" ]; then
-          echo "go get github.com/instana/go-sensor@${{ steps.releaser.outputs.RELEASE_VERSION }}"
+          GO_PKG="go get github.com/instana/go-sensor@${{ steps.releaser.outputs.RELEASE_VERSION }}"
         else
-          echo "go get github.com/instana/go-sensor/instrumentation/${{ steps.releaser.outputs.RELEASE_PACKAGE }}@${{ steps.releaser.outputs.RELEASE_VERSION }}"
+          GO_PKG="go get github.com/instana/go-sensor/instrumentation/${{ steps.releaser.outputs.RELEASE_PACKAGE }}@${{ steps.releaser.outputs.RELEASE_VERSION }}"
         fi
+
+        mkdir dummy && cd dummy
+        go mod init example.com
+        go get "$GO_PKG" || echo "Error getting package $GO_PKG, but moving forward with next step"
+        cd ..
+        rm -rf dummy
 
     - name: Post on Slack
       if: "${{ success() && !inputs.asDraft }}"
