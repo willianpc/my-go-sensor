@@ -144,6 +144,14 @@ if [ "$RELEASE_AS_DRAFT" != "true" ]; then
   AS_DRAFT=""
 fi
 
+echo "RELEASE_VERSION=$NEW_VERSION_TAG" >> "$GITHUB_OUTPUT"
+
+if [ "$IS_CORE" = "false" ]; then
+  echo "RELEASE_PACKAGE=$INSTANA_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+else
+  echo "RELEASE_PACKAGE=Core module" >> "$GITHUB_OUTPUT"
+fi
+
 echo "$GITHUB_TOKEN" > gh_token.txt
 gh auth login --with-token < gh_token.txt
 rm gh_token.txt
