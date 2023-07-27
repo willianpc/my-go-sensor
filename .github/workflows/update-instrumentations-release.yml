@@ -102,9 +102,10 @@ jobs:
         mkdir dummy && cd dummy
         go mod init example.com
         echo "get packages..."
-        cd ..
-        rm -rf dummy
 
         for t in ${{ steps.release-packages.outputs.TAGS }}
-          do echo "$t" | sed 's/\/v/@v/'
+          do go get github.com/instana/go-sensor/$(echo "$t" | sed 's/\/v/@v/')
         done
+
+        cd ..
+        rm -rf dummy
