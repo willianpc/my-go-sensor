@@ -48,8 +48,13 @@ jobs:
     - name: Update pkg.go.dev
       if: "${{ success() && !inputs.asDraft }}"
       run: |
-        echo "checking go version, as it seems to be there already"
-        go version
+        #!/bin/bash
+
+        if [ ${{ steps.releaser.outputs.RELEASE_PACKAGE }} = "go-sensor" ]; then
+          echo "go get github.com/instana/go-sensor@${{ steps.releaser.outputs.RELEASE_VERSION }}"
+        else
+          echo "go get github.com/instana/go-sensor/instrumentation/${{ steps.releaser.outputs.RELEASE_PACKAGE }}@${{ steps.releaser.outputs.RELEASE_VERSION }}"
+        fi
 
     - name: Post on Slack
       if: "${{ success() && !inputs.asDraft }}"
