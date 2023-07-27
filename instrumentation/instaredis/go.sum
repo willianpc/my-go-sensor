@@ -28,8 +28,8 @@ github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/go-cmp v0.5.6 h1:BKbKCqvP6I+rmFHt06ZmyQtvB8xAkWdhFyr0ZUNZcxQ=
 github.com/google/go-cmp v0.5.6/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
-github.com/instana/go-sensor v1.51.0 h1:I84tBgZMVw1CF5cqcp+35QLbOHhxC4RCMdgDkKaEN3w=
-github.com/instana/go-sensor v1.51.0/go.mod h1:vy4pjjaQ8XnhzDdKmtBX41uIIetfPaEHEzLKeIpYT/w=
+github.com/instana/go-sensor v1.52.0 h1:Z2t3pKBrB3vWbtI+lgK8+XyS6c8WIR2UfWYBoG9h5kI=
+github.com/instana/go-sensor v1.52.0/go.mod h1:vy4pjjaQ8XnhzDdKmtBX41uIIetfPaEHEzLKeIpYT/w=
 github.com/looplab/fsm v0.1.0 h1:Qte7Zdn/5hBNbXzP7yxVU4OIFHWXBovyTT2LaBTyC20=
 github.com/looplab/fsm v0.1.0/go.mod h1:m2VaOfDHxqXBBMgc26m6yUOwkFn8H2AlJDE+jd/uafI=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
