@@ -44,20 +44,20 @@ jobs:
         RELEASE_AS_DRAFT: ${{ inputs.asDraft }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: test a
-      if: "${{ success() && inputs.asDraft == false }}"
-      run: echo "this is success() && inputs.asDraft == false"
-    - name: test b
-      if: "${{ success() && !inputs.asDraft }}"
-      run: echo "this is success() && !inputs.asDraft"
-    - name: test c
-      if: "${{ inputs.asDraft == 'false' }}"
-      run: echo "this is inputs.asDraft == 'false'"
-    - name: test d
-      if: "${{ inputs.asDraft == false }}"
-      run: echo "this is inputs.asDraft == false"
+    # - name: test a
+    #   if: "${{ success() && inputs.asDraft == false }}"
+    #   run: echo "this is success() && inputs.asDraft == false"
+    # - name: test b
+    #   if: "${{ success() && !inputs.asDraft }}"
+    #   run: echo "this is success() && !inputs.asDraft"
+    # - name: test c
+    #   if: "${{ inputs.asDraft == 'false' }}"
+    #   run: echo "this is inputs.asDraft == 'false'"
+    # - name: test d
+    #   if: "${{ inputs.asDraft == false }}"
+    #   run: echo "this is inputs.asDraft == false"
     - name: Slack post if not draft
-      if: "${{ success() && inputs.asDraft == 'false' }}"
+      if: "${{ success() && !inputs.asDraft }}"
       uses: slackapi/slack-github-action@v1.24.0
       with:
         channel-id: ${{ secrets.SLACK_RELEASE_CHANNEL_ID }}
