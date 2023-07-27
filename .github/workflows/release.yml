@@ -93,12 +93,14 @@ jobs:
         git commit -m "Updating instrumentations to core module $CORE_TAG"
 
     - name: "Update all instrumentations: push branch upstream"
+      if: "${{ success() && inputs.packageName == '.' }}"
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ github.token }}
         branch: update-instrumentations-core/${{ steps.create-branch.outputs.CORE_TAG }}
 
     - name: "Update all instrumentations: create pull request"
+      if: "${{ success() && inputs.packageName == '.' }}"
       run: |
         CORE_TAG=${{ steps.create-branch.outputs.CORE_TAG }}
         git checkout update-instrumentations-core/"$CORE_TAG"
