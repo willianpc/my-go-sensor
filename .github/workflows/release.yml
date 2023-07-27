@@ -45,6 +45,12 @@ jobs:
         RELEASE_AS_DRAFT: ${{ inputs.asDraft }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Update pkg.go.dev
+      if: "${{ success() && !inputs.asDraft }}"
+      run: |
+        echo "checking go version, as it seems to be there already"
+        go version
+
     - name: Post on Slack
       if: "${{ success() && !inputs.asDraft }}"
       uses: slackapi/slack-github-action@v1.24.0
@@ -81,8 +87,3 @@ jobs:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         SLACK_RELEASE_CHANNEL_ID: ${{ secrets.SLACK_RELEASE_CHANNEL_ID }}
 
-    - name: Update pkg.go.dev
-      if: "${{ !inputs.asDraft }}"
-      run: |
-        echo "checking go version, as it seems to be there already"
-        go version
