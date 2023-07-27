@@ -62,6 +62,11 @@ jobs:
         cd ..
         rm -rf dummy
 
+    - name: Create all updated packages PR
+      if: "${{ inputs.packageName == '.' }}"
+      run: |
+        echo "We can create a pr for all packages because we released the core module"
+
     - name: Post on Slack
       if: "${{ success() && !inputs.asDraft }}"
       uses: slackapi/slack-github-action@v1.24.0
@@ -94,7 +99,3 @@ jobs:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         SLACK_RELEASE_CHANNEL_ID: ${{ secrets.SLACK_RELEASE_CHANNEL_ID }}
 
-    - name: Create all updated packages PR
-      if: "${{ inputs.packageName == '.' }}"
-      run: |
-        echo "We can create a pr for all packages because we released the core module"
